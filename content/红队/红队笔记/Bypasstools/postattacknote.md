@@ -1,0 +1,24 @@
+我想知道，黑dll在进程中的主要加载执行方式具体是什么？再创建一个线程执行dll，还是当loader指定到所需的dll之后，会自动加载文件夹中的黑dll程序中的相应导出函数，然后是在本线程中继续执行导出函数的所有代码，还是重新再一个线程中执行？
+
+loader在加载的过程中（创建进程线程的过程中）会制作IAT表，那也会把黑dll所需的api函数地址现在就写入，还是等
+dll加载之后再修补写入？
+
+也就是说一个exe文件执行之后，加载黑dll的时候，loader会给dll另起一个新的进程，而不是再loader自己的进程
+中执行是吗？
+
+pe文件加载过程所使用的dll中的函数都是被从磁盘中加载到pe文件自己的进程中执行
+
+如果黑dll的iat表修补还需要loader中的代码给他进行查找的话，那么beacon.dll和常规loader三部曲是怎么实现的
+
+## 问题1：什么软件可以看线程的调用堆栈，具体调用顺序谁先谁后怎么看？
+
+
+问题2：loader加载其中的shellcode（本质是beacon.dll的时候）会给beacon令申请一个进程去运行还是在本进程运行，这是不是取决于loader中加载shellcod的代码是怎么写的？那么beacon.dll加载的时候是loader解析这个pe文件是吧？那么beacon.dll自己执行的时候使用的api函数是来自于loader中的iat表中地址，还是loader给他重新从硬盘中找的，这一部分取决于什么，取决于loader中代码吗？是不是就看beacon在不在本进程中加载呀？
+
+问题3：调用堆栈的是不是只记录代码执过程中的dll和函数调用，不会记录系统为加载pe文件调用的函数？调用堆栈只记录函数调用吗不会记录别的调用吗？合法的调用堆栈应该是什么样子的？是一个线程有一个独立的调用堆栈吗还是说什么？
+
+问题4：loader中如果做了bypass etw和amsi以及unhook之后，loader执行会在本进程加载一个黑dll中的某个导出函数，这个导出函数可以调用powershell执行一些恶意脚本，这个脚本的执行还会被edr或者av报毒吗？av和edr检测powershell脚本是否恶意主要从哪几个方面检测，应该怎么规避？
+
+问题5：loader本进程加载其中的shellcode（本质是beacon.dll）之后，如果在loader中patch etw和amsi函数之后，beacon.dll的加载还会被etw函数进行系统记录吗，还会被amsi组件检查吗，为什么不会，请详细说明背后的技术原理，顺便介绍一下etw和amsi的具体工作技术原理？
+
+问题6：如果loader本进程加载beacon.dll然后beacon加载bof，并且loadr中以及进行了bypass amsi和etw，那么bof的执行过程中是不是也就实现了
